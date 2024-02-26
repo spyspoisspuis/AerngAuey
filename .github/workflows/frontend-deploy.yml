@@ -39,4 +39,4 @@ jobs:
             docker image rm ${{ secrets.DOCKERHUB_USERNAME }}/aerngauey-diary-frontend:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aerngauey-diary-frontend:latest
             cd aerngauey
-            docker compose -f docker-compose.prod.yml up -d frontend
+            docker-compose -f docker-compose.prod.yml up -d frontend
