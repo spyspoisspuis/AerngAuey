@@ -1,0 +1,66 @@
+version: "3"
+services:
+  frontend:
+    container_name: frontend-container
+    build:
+      context: ./frontend
+    ports:
+      - 5173:8080
+    restart: always
+    networks:
+      - backbone
+
+  backend:
+    container_name: backend-container
+    build:
+      context: ./backend
+    environment:
+      - FRONTEND_URL=http://frontend
+      - JWT_KEY=${JWT_KEY}
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - AERNGAUEY_PASSWORD=${AERNGAUEY_PASSWORD}
+      - AERNGAUEY_USERNAME=${AERNGAUEY_USERNAME}
+      - SPY_PASSWORD=${SPY_PASSWORD}
+      - SPY_USERNAME=${SPY_USERNAME}
+    ports:
+      - 8081:8081
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - backbone
+
+  db:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      POSTGRES_DB: AerngAuey
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+      - ./volumes/database:/var/lib/postgresql/data
+    networks:
+      - backbone
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-container
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - backbone
+
+networks:
+  backbone:
+    driver: bridge

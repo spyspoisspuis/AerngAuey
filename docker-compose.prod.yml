@@ -1,0 +1,79 @@
+version: "3"
+services:
+  backend:
+    image: ${DOCKERHUB_USERNAME}/aerngauey-diary-backend:latest
+    container_name: backend-container
+    environment:
+      - FRONTEND_URL=http://frontend
+      - JWT_KEY=${JWT_KEY}
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - AERNGAUEY_PASSWORD=${AERNGAUEY_PASSWORD}
+      - AERNGAUEY_USERNAME=${AERNGAUEY_USERNAME}
+      - SPY_PASSWORD=${SPY_PASSWORD}
+      - SPY_USERNAME=${SPY_USERNAME}
+    ports:
+      - 8081:8081
+    restart: 
+      always
+    depends_on:
+      - elastic-db
+    networks:
+      - backbone
+
+  frontend:
+    image: ${DOCKERHUB_USERNAME}/aerngauey-diary-frontend:latest
+    container_name: frontend-container
+    ports:
+      - 5173:8080
+    restart: 
+      always
+    networks:
+      - backbone
+
+  db:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      POSTGRES_DB: AerngAuey
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 5432:5432
+    restart: 
+      always
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+      - ./volumes/database/auth:/var/lib/postgresql/data
+    networks:
+      - backbone
+
+  #* Already run (set up ssl) don't need to run again
+  nginx:
+    image: nginx:latest
+    container_name: nginx-container
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - backbone    
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./certbot/www/:/var/www/certbot
+      - ./certbot/conf/:/etc/letsencrypt
+
+  #* Already run (set up ssl) don't need to run again
+  certbot:
+    image: certbot/certbot:latest
+    networks:
+      - backbone
+    volumes:
+      - ./certbot/www/:/var/www/certbot
+      - ./certbot/conf/:/etc/letsencrypt
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email naruemon.npr@gmail.com -d search.dhammanava.net --agree-tos
+
+networks:
+  backbone:
+    driver: bridge
