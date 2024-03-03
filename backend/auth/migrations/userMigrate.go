@@ -1,10 +1,11 @@
 package migrations
 
 import (
-	"backend/config"
-	"backend/database"
 	"backend/auth/entities"
 	"backend/auth/helper"
+	"backend/config"
+	"backend/database"
+	"backend/util"
 	"log"
 
 	"gorm.io/gorm"
@@ -39,11 +40,11 @@ func UsersMigrate(db database.Database) error {
 func migrateUserEntities(user *config.UserCredential, users []*entities.Users, db database.Database) error {
 	log.Println("Migrating user entities", user.Username)
 	if foundUser := helper.GetUserFromUserLists(users, user.Username); foundUser != nil {
-		log.Println(user.Username,"already exists")
+		log.Println(user.Username, "already exists")
 		return nil
 	}
 
-	uuid, err := helper.GenerateUUID()
+	uuid, err := util.GenerateUUID()
 	if err != nil {
 		return err
 	}
@@ -53,10 +54,10 @@ func migrateUserEntities(user *config.UserCredential, users []*entities.Users, d
 	}
 
 	u := &entities.Users{
-		Id:        uuid,
-		Username:  user.Username,
-		Password:  password,
-		Salt:      salt,
+		Id:       uuid,
+		Username: user.Username,
+		Password: password,
+		Salt:     salt,
 	}
 
 	if err = insertUser(db.GetDb(), u); err != nil {

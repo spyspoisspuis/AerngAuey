@@ -1,7 +1,7 @@
 package entities
 
 type Diary struct {
-	ID      uint   `gorm:"primaryKey;type:serial" json:"id"`
+	ID      string `gorm:"primaryKey" json:"id"`
 	Week    string `json:"week"`
 	Writer  string `json:"writer"`
 	Context string `json:"context"`

@@ -6,7 +6,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE diaries (
-    id SERIAL PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     context TEXT,
     footer TEXT,
     header TEXT,

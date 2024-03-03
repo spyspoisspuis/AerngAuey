@@ -6,7 +6,7 @@ type GetDiaryDto struct {
 	Requester string `json:"requester"`
 }
 type Diary struct {
-	ID      uint   `json:"id"`
+	ID      string `json:"id"`
 	Week    string `json:"week"`
 	Writer  string `json:"writer"`
 	Context string `json:"context"`
