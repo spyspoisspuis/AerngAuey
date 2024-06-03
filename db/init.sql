@@ -6,11 +6,9 @@ CREATE TABLE users (
 );
 
 CREATE TABLE diaries (
-    id VARCHAR(36) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     context TEXT,
-    footer TEXT,
-    header TEXT,
     status VARCHAR(50),
+    writer_id VARCHAR(36),
     week VARCHAR(50),
-    writer VARCHAR(50)
 );
