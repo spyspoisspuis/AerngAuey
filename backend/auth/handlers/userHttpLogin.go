@@ -23,7 +23,6 @@ import (
 // - 401 unauthorized ;  username or password incorrect
 // - 500 internal server error
 func (h *usersHttpHandler) Login(c echo.Context) error {
-	log.Println("Login : Starting handler...")
 	reqBody := new(models.LoginDto)
 	if err := c.Bind(reqBody); err != nil {
 		log.Println("Login : Error while binding request body: ", err)
@@ -31,7 +30,6 @@ func (h *usersHttpHandler) Login(c echo.Context) error {
 
 	}
 
-	log.Println("Login : Username: ", reqBody.Username)
 	token, username, err := h.usersUsecase.Login(reqBody)
 	if err != nil {
 		if er, ok := err.(*errors.RequestError); ok {

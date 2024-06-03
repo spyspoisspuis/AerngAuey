@@ -4,7 +4,6 @@ import (
 	"backend/diary/helper"
 	"backend/diary/models"
 	"backend/diary/repository"
-	"backend/util"
 )
 
 type DiaryUsecasesImpl struct {
@@ -26,7 +25,7 @@ func (d *DiaryUsecasesImpl) GetDiary(in *models.GetDiaryDto) (*models.Diary, err
 		return nil,nil
 	}
 
-	if diary.Status != "confirm" {
+	if diary.StatusConfirm {
 		if diary.Writer != in.Requester {
 			return &models.Diary{}, nil
 		}
@@ -41,14 +40,7 @@ func (d *DiaryUsecasesImpl) GetDiary(in *models.GetDiaryDto) (*models.Diary, err
 func (d *DiaryUsecasesImpl) AddDiary(in *models.Diary) error {
 	diary := helper.ConvertDiaryModelsToEntity(in)
 	
-	id,err := util.GenerateUUID()
-	if err != nil {
-		return err
-	}
-
-	diary.ID = id
-
-	err = d.diaryRepository.AddDiary(diary)
+	err := d.diaryRepository.AddDiary(diary)
 	if err != nil {
 		return err
 	}

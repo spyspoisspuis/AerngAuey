@@ -3,10 +3,11 @@ package server
 import (
 	"fmt"
 
-	"backend/config"
 	usersHandlers "backend/auth/handlers"
 	usersRepositories "backend/auth/repository"
 	usersUsecases "backend/auth/usecases"
+	"backend/config"
+	"backend/jwt"
 
 	diaryHandlers "backend/diary/handlers"
 	diaryRepositories "backend/diary/repository"
@@ -18,9 +19,9 @@ import (
 )
 
 type echoServer struct {
-	App  *echo.Echo
-	db   *gorm.DB
-	cfg  *config.Config
+	App *echo.Echo
+	db  *gorm.DB
+	cfg *config.Config
 }
 
 func NewEchoServer(cfg *config.Config, db *gorm.DB) Server {
@@ -33,6 +34,7 @@ func NewEchoServer(cfg *config.Config, db *gorm.DB) Server {
 
 func (s *echoServer) Start() {
 	s.initializeUsersHttpHandler()
+	s.initializeDiaryHttpHandler()
 
 	s.App.Use(middleware.Logger())
 	s.App.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -67,12 +69,6 @@ func (s *echoServer) initializeUsersHttpHandler() {
 
 	usersHttpHandler := usersHandlers.NewUsersHttpHandler(usersUsecase)
 
-	// Diary 
-	diaryRepo := diaryRepositories.NewDiaryRepository(s.db)
-	diaryUsecase := diaryUsecases.NewDiaryUsecases(diaryRepo)
-	diaryHttp := diaryHandlers.NewDiaryHttpHandler(diaryUsecase)
-
-
 	// Routers
 
 	// Login Request
@@ -87,7 +83,21 @@ func (s *echoServer) initializeUsersHttpHandler() {
 	// - 500 internal server error
 	s.App.POST("/login", usersHttpHandler.Login)
 
-	s.App.GET("/diary/:writer/:week", diaryHttp.GetDiary)
-	s.App.POST("/diary", diaryHttp.AddDiary)
-	s.App.PUT("/diary", diaryHttp.UpdateDiary)
+}
+
+func (s *echoServer) initializeDiaryHttpHandler() {
+	// Initialize all layers
+
+	// Diary
+	diaryRepo := diaryRepositories.NewDiaryRepository(s.db)
+	diaryUsecase := diaryUsecases.NewDiaryUsecases(diaryRepo)
+	diaryHttp := diaryHandlers.NewDiaryHttpHandler(diaryUsecase)
+
+	// Routers
+	diaryRoutes := s.App.Group("/diary")
+	diaryRoutes.Use(jwt.ValidateToken)
+
+	diaryRoutes.GET("/:writer/:week", diaryHttp.GetDiary)
+	diaryRoutes.POST("", diaryHttp.AddDiary)
+	diaryRoutes.PUT("", diaryHttp.UpdateDiary)
 }
