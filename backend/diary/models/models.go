@@ -5,12 +5,11 @@ type GetDiaryDto struct {
 	Writer    string `json:"writer"`
 	Requester string `json:"requester"`
 }
+
 type Diary struct {
-	ID      string `json:"id"`
-	Week    string `json:"week"`
-	Writer  string `json:"writer"`
-	Context string `json:"context"`
-	Header  string `json:"header"`
-	Footer  string `json:"footer"`
-	Status  string `json:"status"`
+	ID            int    `json:"id,omitempty"`
+	Week          string `json:"week"`
+	Writer        string `json:"writer"`
+	Context       string `json:"context"`
+	StatusConfirm bool   `json:"status"`
 }
